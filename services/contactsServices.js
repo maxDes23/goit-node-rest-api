@@ -1,45 +1,73 @@
-const fs = require("node:fs/promises");
-const path = require("node:path");
-const contactsPath = path.join(__dirname, "./db/contacts.json");
-const { nanoid } = require("nanoid");
+import Contact from "../db/contacts";
 
 async function listContacts() {
-  const allContacts = await fs.readFile(contactsPath);
-  return JSON.parse(allContacts);
+  try {
+    const contacts = await Contact.find();
+    return contacts;
+  } catch (error) {
+    console.error("Error reading contacts:", error);
+  }
 }
 
 async function getContactById(contactId) {
-  const contacts = await listContacts();
-  const contactById = contacts.find((contact) => contact.id === contactId);
-  return contactById || null;
+  try {
+    const contact = await Contact.findById(contactId);
+    return contact;
+  } catch (error) {
+    console.error("Error getting contact by ID:", error);
+  }
 }
 
 async function removeContact(contactId) {
-  const contacts = await listContacts();
-  const index = contacts.findIndex((contact) => contact.id === contactId);
-  if (index === -1) return null;
-  const [deleteContact] = contacts.splice(index, 1);
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  return deleteContact;
+  try {
+    const contact = await Contact.findByIdAndDelete(contactId);
+    return contact;
+  } catch (error) {
+    console.error("Error removing contact:", error);
+  }
 }
 
 async function addContact(name, email, phone) {
-  const contacts = await listContacts();
-  const newContact = {
-    id: nanoid(),
-    name,
-    email,
-    phone,
-  };
-
-  contacts.push(newContact);
-  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
-  return newContact;
+  try {
+    const newContact = new Contact({ name, email, phone });
+    await newContact.save();
+    return newContact;
+  } catch (error) {
+    console.error("Error adding contact:", error);
+  }
 }
 
-module.exports = {
+async function updateContact(id, updatedContact) {
+  try {
+    const contact = await Contact.findByIdAndUpdate(id, updatedContact, {
+      new: true,
+    });
+    return contact;
+  } catch (error) {
+    console.error("Error updating contact:", error);
+  }
+}
+
+async function updateStatusContact(id, favorite) {
+  try {
+    const contact = await Contact.findByIdAndUpdate(
+      id,
+      { favorite },
+      { new: true }
+    );
+    return contact;
+  } catch (error) {
+    console.error("Error updating contact status:", error);
+  }
+}
+
+const contactsService = {
   listContacts,
   getContactById,
   removeContact,
   addContact,
+  updateContact,
+  updateStatusContact,
 };
+
+export default contactsService;
