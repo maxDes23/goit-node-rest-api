@@ -8,11 +8,13 @@ import dotenv from "dotenv";
 dotenv.config();
 const app = express();
 
-const { DB_HOST = "mongodb://localhost:3000/mydatabase", PORT = 3000 } =
-  process.env;
+const {
+  DB_URI = "mongodb+srv://Student:BfuREnsJF9CYT589@cluster0.awdzfcn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
+  PORT = 3000,
+} = process.env;
 
 mongoose
-  .connect(DB_HOST)
+  .connect(DB_URI)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server is running. Use our API on port: ${PORT}`);
