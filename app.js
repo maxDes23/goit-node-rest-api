@@ -8,17 +8,19 @@ import dotenv from "dotenv";
 dotenv.config();
 const app = express();
 
-const { DB_HOST, PORT = 3000 } = process.env;
+const { DB_HOST = "mongodb://localhost:3000/mydatabase", PORT = 3000 } =
+  process.env;
 
 mongoose
   .connect(DB_HOST)
   .then(() => {
     app.listen(PORT, () => {
+      console.log(`Server is running. Use our API on port: ${PORT}`);
       console.log(`Database connection successful.`);
     });
   })
   .catch((err) => {
-    console.log(err.message);
+    console.error(err.message);
     process.exit(1);
   });
 
@@ -35,8 +37,4 @@ app.use((_, res) => {
 app.use((err, req, res, next) => {
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
-});
-
-app.listen(3000, () => {
-  console.log("Server is running. Use our API on port: 3000");
 });
