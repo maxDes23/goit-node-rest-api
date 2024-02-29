@@ -8,20 +8,18 @@ export const getAllContacts = async (req, res, next) => {
 
 export const getOneContact = async (req, res, next) => {
   const contact = await contactsService.getContactById(req.params.id);
-  if (contact) {
-    res.status(200).json(contact);
-  } else {
+  if (!contact) {
     next(HttpError(404));
   }
+  res.status(200).json(contact);
 };
 
 export const deleteContact = async (req, res, next) => {
   const contact = await contactsService.removeContact(req.params.id);
-  if (contact) {
-    res.status(200).json(contact);
-  } else {
+  if (!contact) {
     next(HttpError(404));
   }
+  res.status(200).json(contact);
 };
 
 export const createContact = async (req, res, next) => {
@@ -31,11 +29,10 @@ export const createContact = async (req, res, next) => {
 
 export const updateContact = async (req, res, next) => {
   const contact = await contactsService.updateContact(req.params.id, req.body);
-  if (contact) {
-    res.status(200).json(contact);
-  } else {
+  if (!contact) {
     next(HttpError(404, "Contact not found"));
   }
+  res.status(200).json(contact);
 };
 
 export const updateStatusContact = async (req, res, next) => {

@@ -8,11 +8,8 @@ import dotenv from "dotenv";
 dotenv.config();
 const app = express();
 
-const {
-  DB_URI = "mongodb+srv://Student:BfuREnsJF9CYT589@cluster0.awdzfcn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
-  PORT = 3000,
-} = process.env;
-
+const { DB_URI = "mongodb://localhost:27017/mydatabase", PORT = 3000 } =
+  process.env;
 mongoose
   .connect(DB_URI)
   .then(() => {
