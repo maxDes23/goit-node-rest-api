@@ -9,7 +9,7 @@ import usersRouter from "./routes/usersRouter.js";
 dotenv.config();
 const app = express();
 
-const { DB_URI = "mongodb://localhost:27017/mydatabase", PORT = 3000 } =
+const { DB_URI = "mongodb://localhost:3000", PORT = 3000 } =
   process.env;
 mongoose
   .connect(DB_URI)
@@ -38,4 +38,8 @@ app.use((_, res) => {
 app.use((err, req, res, next) => {
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
+});
+
+app.listen(3000, () => {
+  console.log("Server is running. Use our API on port: 3000");
 });

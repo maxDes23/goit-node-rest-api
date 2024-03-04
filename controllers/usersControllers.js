@@ -5,12 +5,7 @@ export const register = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    let user;
-    if (email && password) {
-      user = await usersService.registerUser(email, password);
-    } else {
-      throw new Error("Email and password are required");
-    }
+    const user = await usersService.registerUser(email, password);
     res.status(201).json({ user });
   } catch (error) {
     next(HttpError(409, error.message));
@@ -21,12 +16,7 @@ export const login = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    let result;
-    if (email && password) {
-      result = await usersService.loginUser(email, password);
-    } else {
-      throw new Error("Email and password are required");
-    }
+    const result = await usersService.loginUser(email, password);
     res.status(200).json(result);
   } catch (error) {
     next(HttpError(401, error.message));
@@ -35,12 +25,11 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    if (req.user && req.user._id) {
-      await usersService.logoutUser(req.user._id);
-      res.status(204).end();
-    } else {
+    if (!req.user || !req.user._id) {
       throw new Error("User not authorized");
     }
+    await usersService.logoutUser(req.user._id);
+    res.status(204).end();
   } catch (error) {
     next(HttpError(401, error.message));
   }
@@ -48,12 +37,11 @@ export const logout = async (req, res, next) => {
 
 export const getCurrentUser = async (req, res, next) => {
   try {
-    if (req.user && req.user._id) {
-      const user = await usersService.getCurrentUser(req.user._id);
-      res.status(200).json(user);
-    } else {
+    if (!req.user || !req.user._id) {
       throw new Error("User not authorized");
     }
+    const user = await usersService.getCurrentUser(req.user._id);
+    res.status(200).json(user);
   } catch (error) {
     next(HttpError(401, error.message));
   }
@@ -63,12 +51,13 @@ export const updateSubscription = async (req, res, next) => {
   const { subscription } = req.body;
 
   try {
-    let user;
-    if (req.user && req.user._id && subscription) {
-      user = await usersService.updateSubscription(req.user._id, subscription);
-    } else {
+    if (!req.user || !req.user._id || !subscription) {
       throw new Error("User ID and subscription are required");
     }
+    const user = await usersService.updateSubscription(
+      req.user._id,
+      subscription
+    );
     res.status(200).json(user);
   } catch (error) {
     next(HttpError(500, error.message));
