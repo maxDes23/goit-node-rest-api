@@ -9,13 +9,13 @@ import usersRouter from "./routes/usersRouter.js";
 dotenv.config();
 const app = express();
 
-const { DB_URI = "mongodb://localhost:3000", PORT = 3000 } =
-  process.env;
+const { DB_URI = "mongodb://localhost:3000", PORT = 3000 } = process.env;
+
 mongoose
   .connect(DB_URI)
   .then(() => {
     app.listen(PORT, () => {
-      console.log(`Server is running. Use our API on port: ${PORT}`);
+      console.log(`Server is running. Use our API on port:3000`);
       console.log(`Database connection successful.`);
     });
   })
@@ -40,6 +40,3 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-app.listen(3000, () => {
-  console.log("Server is running. Use our API on port: 3000");
-});
