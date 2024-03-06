@@ -2,31 +2,35 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
-import contactsRouter from "./routes/contactsRouter.js";
 import dotenv from "dotenv";
+import path from "path";
+import contactsRouter from "./routes/contactsRouter.js";
 import usersRouter from "./routes/usersRouter.js";
 
 dotenv.config();
 const app = express();
 
-const { DB_URI = "mongodb://localhost:3000", PORT = 3000 } = process.env;
+const uri = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/db-contacts?retryWrites=true&w=majority`;
+
 
 mongoose
-  .connect(DB_URI)
+  .connect(uri)
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running. Use our API on port:3000`);
-      console.log(`Database connection successful.`);
-    });
+    console.log(`Database connection successful.`);
   })
   .catch((err) => {
     console.error(err.message);
     process.exit(1);
   });
 
+const PORT = process.env.PORT || 3000;
+
 app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
+
+const publicDirectoryPath = path.join(path.resolve(), "public");
+app.use(express.static(publicDirectoryPath));
 
 app.use("/api/users", usersRouter);
 app.use("/api/contacts", contactsRouter);
@@ -40,3 +44,6 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
+app.listen(PORT, () => {
+  console.log(`Server is running. Use our API on port ${PORT}`);
+});
