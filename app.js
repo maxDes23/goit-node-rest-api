@@ -10,27 +10,24 @@ import usersRouter from "./routes/usersRouter.js";
 dotenv.config();
 const app = express();
 
-const uri = `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/db-contacts?retryWrites=true&w=majority`;
-
+const { DB_URI = "mongodb://localhost:3000", PORT = 3000 } = process.env;
 
 mongoose
-  .connect(uri)
+  .connect(DB_URI)
   .then(() => {
-    console.log(`Database connection successful.`);
+    app.listen(PORT, () => {
+      console.log(`Server is running. Use our API on port:3000`);
+      console.log(`Database connection successful.`);
+    });
   })
   .catch((err) => {
     console.error(err.message);
     process.exit(1);
   });
 
-const PORT = process.env.PORT || 3000;
-
 app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
-
-const publicDirectoryPath = path.join(path.resolve(), "public");
-app.use(express.static(publicDirectoryPath));
 
 app.use("/api/users", usersRouter);
 app.use("/api/contacts", contactsRouter);
@@ -42,8 +39,4 @@ app.use((_, res) => {
 app.use((err, req, res, next) => {
   const { status = 500, message = "Server error" } = err;
   res.status(status).json({ message });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running. Use our API on port ${PORT}`);
 });
