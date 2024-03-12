@@ -3,17 +3,26 @@ import gravatar from "gravatar";
 import jimp from "jimp";
 import path from "path";
 import fs from "fs/promises";
+import { sendVerificationEmail } from "../services/emailService.js";
+import { nanoid } from "nanoid";
 
 export const register = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
+    const verificationToken = nanoid();
     const avatarURL = gravatar.url(
       email,
       { s: "250", r: "x", d: "retro" },
       true
     );
-    const user = await usersService.registerUser(email, password, avatarURL);
+    const user = await usersService.registerUser(
+      email,
+      password,
+      avatarURL,
+      verificationToken
+    );
+    await sendVerificationEmail(email, verificationToken);
     res.status(201).json({ user });
   } catch (error) {
     next(error);
@@ -92,3 +101,29 @@ export const updateAvatar = async (req, res, next) => {
     next(error);
   }
 };
+
+export const resendVerificationEmail = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "missing required field email" });
+  }
+  try {
+    const user = await usersService.findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.verify) {
+      return res
+        .status(400)
+        .json({ message: "Verification has already been passed" });
+    }
+    const verificationToken = nanoid();
+    user.verificationToken = verificationToken;
+    await user.save();
+    await sendVerificationEmail(email, verificationToken);
+    res.status(200).json({ message: "Verification email sent" });
+  } catch (error) {
+    next(error);
+  }
+};
+

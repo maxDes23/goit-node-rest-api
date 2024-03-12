@@ -7,6 +7,7 @@ import multer from "multer";
 
 const router = express.Router();
 const upload = multer({ dest: "tmp" });
+
 router.post("/register", validateBody(userSchema), usersController.register);
 router.post("/login", validateBody(userSchema), usersController.login);
 router.post("/logout", authMiddleware, usersController.logout);
@@ -24,5 +25,11 @@ router.patch(
   upload.single("avatar"),
   usersController.updateAvatar
 );
+
+router.get("/verify/:verificationToken", (req, res) => {
+  usersController.verifyUser(req, res);
+});
+
+router.post("/verify", usersController.resendVerificationEmail);
 
 export default router;

@@ -3,14 +3,24 @@ import jwt from "jsonwebtoken";
 import User from "../db/user.js";
 import HttpError from "../helpers/HttpError.js";
 
-export const registerUser = async (email, password) => {
+export const registerUser = async (
+  email,
+  password,
+  avatarURL,
+  verificationToken
+) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     throw HttpError(409, "Email in use");
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = new User({ email, password: hashedPassword });
+  const user = new User({
+    email,
+    password: hashedPassword,
+    avatarURL,
+    verificationToken,
+  });
   await user.save();
 
   return { email, subscription: user.subscription };
@@ -71,5 +81,18 @@ export const updateSubscription = async (userId, subscription) => {
 
 export const updateUser = async (id, updateInfo) => {
   const user = await User.findByIdAndUpdate(id, updateInfo, { new: true });
+  return user;
+};
+
+export const findUserByEmail = async (email) => {
+  return await User.findOne({ email });
+};
+
+export const verifyUser = async (Token) => {
+  const user = await User.findOneAndUpdate(
+    { verificationToken: Token },
+    { verify: true, verificationToken: "" },
+    { new: true }
+  );
   return user;
 };
