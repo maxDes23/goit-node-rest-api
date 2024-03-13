@@ -102,6 +102,20 @@ export const updateAvatar = async (req, res, next) => {
   }
 };
 
+export const verifyUser = async (req, res, next) => {
+  const { verificationToken } = req.params;
+
+  try {
+    const user = await usersService.verifyUser(verificationToken);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ message: "User verified successfully", user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const resendVerificationEmail = async (req, res, next) => {
   const { email } = req.body;
   if (!email) {
